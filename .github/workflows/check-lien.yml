@@ -1,0 +1,52 @@
+name: Vérifier lien.txt
+
+on:
+  push:
+    branches: ["*"]
+  pull_request:
+    branches: ["*"]
+
+jobs:
+  check-file:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout du dépôt
+        uses: actions/checkout@v4
+
+      - name: Vérifier la présence de lien.txt
+        run: |
+          if [ ! -f "lien.txt" ]; then
+            echo "❌ Le fichier lien.txt est introuvable."
+            exit 1
+          fi
+          echo "✅ Le fichier lien.txt existe."
+
+      - name: Vérifier le lien Figma
+        run: |
+          if grep -qE 'https?://(www\.)?figma\.com/' lien.txt; then
+            echo "✅ Lien Figma trouvé."
+          else
+            echo "❌ Aucun lien Figma trouvé dans lien.txt."
+            echo "   Attendu : un lien contenant figma.com/"
+            exit 1
+          fi
+
+      - name: Vérifier le lien GitHub Pages
+        run: |
+          if grep -qE 'https?://[a-zA-Z0-9_-]+\.github\.io/' lien.txt; then
+            echo "✅ Lien GitHub Pages trouvé."
+          else
+            echo "❌ Aucun lien GitHub Pages trouvé dans lien.txt."
+            echo "   Attendu : un lien contenant <username>.github.io/"
+            exit 1
+          fi
+
+      - name: Vérifier le lien du repo Git
+        run: |
+          if grep -qE 'https?://github\.com/[a-zA-Z0-9_-]+/[a-zA-Z0-9_.-]+' lien.txt; then
+            echo "✅ Lien de repo GitHub trouvé."
+          else
+            echo "❌ Aucun lien de repo GitHub trouvé dans lien.txt."
+            echo "   Attendu : un lien contenant github.com/<user>/<repo>"
+            exit 1
+          fi
